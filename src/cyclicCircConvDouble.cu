@@ -10,6 +10,8 @@
 #include <time.h>
 #include <math.h>
 
+#include <unistd.h>
+
 #include "common.h"
 #include <cuda_runtime.h>
 
@@ -31,6 +33,36 @@ static double get_delta_time(void);
 
 int main (int argc, char **argv)
 {
+  int bx=0,by=0,gx=0,gy=0,opt=0;
+
+  while ((opt = getopt(argc, argv, "a:s:d:f:")) != -1)
+  {
+     switch (opt) {
+     case 'a':
+         bx = atoi(optarg);
+         printf("%d, %d, %d, %d\n", bx,by,gx,gy);
+         break;
+     case 's':
+         by = atoi(optarg);
+         printf("%d, %d, %d, %d\n", bx,by,gx,gy);
+         break;
+     case 'd':
+         gx = atoi(optarg);
+         printf("%d, %d, %d, %d\n", bx,by,gx,gy);
+         break;
+     case 'f':
+         gy = atoi(optarg);
+         printf("%d, %d, %d, %d\n", bx,by,gx,gy);
+         break;
+     default: /* '?' */
+         fprintf(stderr, "Usage: %s [-t nsecs] [-n] name\n",
+                 argv[0]);
+         exit(EXIT_FAILURE);
+     }
+  }
+  printf("%d, %d, %d, %d\n", bx,by,gx,gy);
+
+
   printf("%s Starting...\n", argv[0]);
 
   // set up device
@@ -74,12 +106,12 @@ int main (int argc, char **argv)
   // as an example, N thread blocks are launched where each thread block deals solely with one convolution point
   unsigned int gridDimX, gridDimY, gridDimZ, blockDimX, blockDimY, blockDimZ;
 
-  blockDimX = 1 << 0;                                                    // optimize!
-  blockDimY = 1 << 0;                                                    // optimize!
+  blockDimX = bx;                                                    // optimize!
+  blockDimY = by;                                                    // optimize!
   blockDimZ = 1 << 0;                                                    // optimize!
-  gridDimX = 1 << 16;                                                    // optimize!
-  gridDimY = 1 << 0;                                                     // optimize!
-  gridDimZ = 1 << 0;                                                     // optimize!
+  gridDimX  = gx;                                                    // optimize!
+  gridDimY  = gy;                                                     // optimize!
+  gridDimZ  = 1 << 0;                                                     // optimize!
   if ((blockDimX * blockDimY * blockDimZ * gridDimX * gridDimY * gridDimZ) != N)
      { fprintf (stderr,"Wrong launch configuration!\n");
        exit (1);
